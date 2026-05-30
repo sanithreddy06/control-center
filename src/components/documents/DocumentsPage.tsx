@@ -26,36 +26,47 @@ export function DocumentsPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const lockVault = useCallback(async () => {
-    await fetch("/api/documents/verify-vault", { method: "DELETE" });
+    await fetch("/api/documents/verify-vault", {
+      method: "DELETE",
+      credentials: "same-origin",
+    });
     setLocked(true);
     setDocuments([]);
   }, []);
 
   const fetchDocuments = useCallback(async () => {
-    const res = await fetch("/api/documents");
+    const res = await fetch("/api/documents", { credentials: "same-origin" });
     if (res.ok) {
       const data = await res.json();
       setLocked(data.locked);
       setDocuments(data.documents || []);
+      return data.locked === false;
     }
     setLoading(false);
+    return false;
   }, []);
 
-  // Require vault password on every visit to Documents
+  // Lock vault on each visit to Documents (password required every time)
   useEffect(() => {
-    let mounted = true;
+    let active = true;
     (async () => {
       setLoading(true);
-      await fetch("/api/documents/verify-vault", { method: "DELETE" });
-      if (mounted) {
+      await fetch("/api/documents/verify-vault", {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+      if (active) {
         setLocked(true);
         setDocuments([]);
         setLoading(false);
       }
     })();
     return () => {
-      mounted = false;
-      fetch("/api/documents/verify-vault", { method: "DELETE" });
+      active = false;
+      fetch("/api/documents/verify-vault", {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
     };
   }, []);
 
@@ -67,7 +78,10 @@ export function DocumentsPage() {
 
     const resetTimer = () => {
       clearTimeout(timeoutId);
-      fetch("/api/documents/vault-heartbeat", { method: "POST" }).catch(() => {});
+      fetch("/api/documents/vault-heartbeat", {
+        method: "POST",
+        credentials: "same-origin",
+      }).catch(() => {});
       timeoutId = setTimeout(() => {
         lockVault();
       }, VAULT_INACTIVITY_SECONDS * 1000);
@@ -86,18 +100,30 @@ export function DocumentsPage() {
   const unlockVault = async (e: React.FormEvent) => {
     e.preventDefault();
     setVaultError("");
-    const res = await fetch("/api/documents/verify-vault", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ vaultPassword }),
-    });
-    if (res.ok) {
-      setLocked(false);
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/documents/verify-vault", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ vaultPassword }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setVaultError(data.error || "Incorrect vault password");
+        return;
+      }
+
       setVaultPassword("");
-      await fetchDocuments();
-    } else {
-      const data = await res.json();
-      setVaultError(data.error || "Incorrect password");
+      const unlocked = await fetchDocuments();
+      if (!unlocked) {
+        setVaultError("Vault unlock failed. Please try again.");
+        setLocked(true);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
