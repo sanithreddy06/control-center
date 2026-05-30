@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, serverErrorResponse, unauthorizedResponse } from "@/lib/auth/helpers";
 import { createAdminClient } from "@/lib/supabase/client";
-import { cookies } from "next/headers";
-
-const VAULT_COOKIE = "vault_unlocked";
+import { isVaultUnlocked } from "@/lib/vault-server";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -15,8 +13,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
     return unauthorizedResponse();
   }
 
-  const cookieStore = await cookies();
-  if (cookieStore.get(VAULT_COOKIE)?.value !== user.id) {
+  if (!(await isVaultUnlocked(user.id))) {
     return NextResponse.json({ error: "Vault locked" }, { status: 403 });
   }
 
@@ -55,8 +52,7 @@ export async function DELETE(_request: NextRequest, { params }: Params) {
     return unauthorizedResponse();
   }
 
-  const cookieStore = await cookies();
-  if (cookieStore.get(VAULT_COOKIE)?.value !== user.id) {
+  if (!(await isVaultUnlocked(user.id))) {
     return NextResponse.json({ error: "Vault locked" }, { status: 403 });
   }
 

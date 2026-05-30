@@ -3,11 +3,16 @@
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Monitor, LogOut, Shield } from "lucide-react";
+import { Sun, Moon, Monitor, LogOut, Shield, Bell } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
+import {
+  requestNotificationPermission,
+  notificationsEnabled,
+  setNotificationsEnabled,
+} from "@/components/NotificationManager";
 
 export function SettingsPage() {
   const { data: session, update } = useSession();
@@ -24,9 +29,11 @@ export function SettingsPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
+  const [notificationsOn, setNotificationsOn] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    setNotificationsOn(notificationsEnabled());
   }, []);
 
   useEffect(() => {
@@ -163,6 +170,31 @@ export function SettingsPage() {
               </button>
             ))}
           </div>
+        </Card>
+
+        <Card>
+          <h2 className="mb-4 flex items-center gap-2 font-medium">
+            <Bell className="h-4 w-4" /> Notifications
+          </h2>
+          <p className="mb-4 text-sm text-neutral-500">
+            Get reminders for tasks due today and upcoming exams when Control Center is open.
+          </p>
+          <Button
+            variant={notificationsOn ? "secondary" : "primary"}
+            onClick={async () => {
+              if (notificationsOn) {
+                setNotificationsEnabled(false);
+                setNotificationsOn(false);
+                showMessage("Notifications disabled");
+              } else {
+                const granted = await requestNotificationPermission();
+                setNotificationsOn(granted);
+                showMessage(granted ? "Notifications enabled" : "Notification permission denied");
+              }
+            }}
+          >
+            {notificationsOn ? "Disable Notifications" : "Enable Notifications"}
+          </Button>
         </Card>
 
         <Card>

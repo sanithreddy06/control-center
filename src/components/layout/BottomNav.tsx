@@ -11,7 +11,6 @@ import {
   GraduationCap,
   Calendar,
   Bookmark,
-  Search,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,7 +19,7 @@ const mobileNavItems = [
   { href: "/dashboard", label: "Home", icon: LayoutDashboard },
   { href: "/notes", label: "Notes", icon: StickyNote },
   { href: "/todos", label: "Todos", icon: CheckSquare },
-  { href: "/search", label: "Search", icon: Search },
+  { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

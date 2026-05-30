@@ -1,14 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { requireAuth, serverErrorResponse, unauthorizedResponse, badRequestResponse } from "@/lib/auth/helpers";
 import { createAdminClient } from "@/lib/supabase/client";
 import { verifyPassword } from "@/lib/auth/password";
 import { vaultVerifySchema } from "@/lib/validators";
-import { cookies } from "next/headers";
+import { clearVaultSession, setVaultUnlocked } from "@/lib/vault-server";
 
-const VAULT_COOKIE = "vault_unlocked";
-const VAULT_DURATION = 60 * 60;
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   let user;
   try {
     user = await requireAuth();
@@ -43,15 +40,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Incorrect vault password" }, { status: 401 });
     }
 
-    const cookieStore = await cookies();
-    cookieStore.set(VAULT_COOKIE, user.id, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: VAULT_DURATION,
-      path: "/",
-    });
-
+    await setVaultUnlocked(user.id);
     return NextResponse.json({ success: true });
   } catch {
     return serverErrorResponse();
@@ -59,7 +48,12 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE() {
-  const cookieStore = await cookies();
-  cookieStore.delete(VAULT_COOKIE);
+  try {
+    await requireAuth();
+  } catch {
+    return unauthorizedResponse();
+  }
+
+  await clearVaultSession();
   return NextResponse.json({ success: true });
 }

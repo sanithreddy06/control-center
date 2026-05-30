@@ -48,7 +48,6 @@ export const NAV_ITEMS = [
   { href: "/exams", label: "Exams", icon: "GraduationCap" },
   { href: "/calendar", label: "Calendar", icon: "Calendar" },
   { href: "/bookmarks", label: "Bookmarks", icon: "Bookmark" },
-  { href: "/search", label: "Search", icon: "Search" },
   { href: "/analytics", label: "Analytics", icon: "BarChart3", adminOnly: true },
   { href: "/settings", label: "Settings", icon: "Settings" },
   { href: "/logout", label: "Logout", icon: "LogOut" },

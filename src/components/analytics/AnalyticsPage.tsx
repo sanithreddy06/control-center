@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   BarChart,
   Bar,
@@ -26,15 +28,24 @@ interface AnalyticsData {
 }
 
 export function AnalyticsPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (status === "authenticated" && session?.user?.role !== "admin") {
+      router.replace("/dashboard");
+    }
+  }, [status, session, router]);
+
+  useEffect(() => {
+    if (session?.user?.role !== "admin") return;
     fetch("/api/analytics?days=30")
       .then((res) => res.json())
       .then(setData)
       .finally(() => setLoading(false));
-  }, []);
+  }, [session?.user?.role]);
 
   if (loading) return <LoadingSpinner />;
   if (!data) return <p className="text-neutral-500">Failed to load analytics</p>;

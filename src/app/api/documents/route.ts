@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, serverErrorResponse, unauthorizedResponse, badRequestResponse } from "@/lib/auth/helpers";
 import { createAdminClient } from "@/lib/supabase/client";
-import { verifyPassword } from "@/lib/auth/password";
-import { vaultVerifySchema } from "@/lib/validators";
 import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from "@/lib/constants";
-import { cookies } from "next/headers";
-
-const VAULT_COOKIE = "vault_unlocked";
-const VAULT_DURATION = 60 * 60; // 1 hour
+import { isVaultUnlocked } from "@/lib/vault-server";
 
 export async function GET() {
   let user;
@@ -17,8 +12,7 @@ export async function GET() {
     return unauthorizedResponse();
   }
 
-  const cookieStore = await cookies();
-  const vaultUnlocked = cookieStore.get(VAULT_COOKIE)?.value === user.id;
+  const vaultUnlocked = await isVaultUnlocked(user.id);
 
   if (!vaultUnlocked) {
     return NextResponse.json({ locked: true, documents: [] });
@@ -47,8 +41,8 @@ export async function POST(request: NextRequest) {
     return unauthorizedResponse();
   }
 
-  const cookieStore = await cookies();
-  if (cookieStore.get(VAULT_COOKIE)?.value !== user.id) {
+  const vaultUnlocked = await isVaultUnlocked(user.id);
+  if (!vaultUnlocked) {
     return NextResponse.json({ error: "Vault locked" }, { status: 403 });
   }
 
