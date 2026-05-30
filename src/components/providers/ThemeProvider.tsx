@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { THEME_STORAGE_KEY } from "@/lib/theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -8,8 +9,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       attribute="class"
       defaultTheme="system"
       enableSystem
-      disableTransitionOnChange
-      storageKey="cc-theme"
+      enableColorScheme
+      storageKey={THEME_STORAGE_KEY}
+      disableTransitionOnChange={false}
     >
       {children}
     </NextThemesProvider>

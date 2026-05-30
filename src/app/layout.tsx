@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { ThemeSync } from "@/components/providers/ThemeSync";
+import { ThemeScript } from "@/components/providers/ThemeScript";
+import { ThemeInitializer } from "@/components/providers/ThemeInitializer";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 import "./globals.css";
@@ -48,10 +49,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} h-full`}>
-      <body className="min-h-full antialiased">
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="min-h-full antialiased bg-neutral-50 text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100">
         <ThemeProvider>
           <AuthProvider>
-            <ThemeSync />
+            <ThemeInitializer />
             <AnalyticsTracker />
             {children}
           </AuthProvider>

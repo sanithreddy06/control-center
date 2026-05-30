@@ -35,6 +35,23 @@ body {
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }
 
+/* Smooth color transitions after mount — color properties only */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-colors-transition,
+  html.theme-colors-transition * {
+    transition-property: background-color, border-color, color, fill, stroke, outline-color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+  }
+}
+
+/* Prevent transition flash during first paint */
+html:not(.theme-colors-transition) *,
+html:not(.theme-colors-transition) *::before,
+html:not(.theme-colors-transition) *::after {
+  transition: none !important;
+}
+
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }

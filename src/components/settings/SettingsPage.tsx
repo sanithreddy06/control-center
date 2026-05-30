@@ -2,21 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { useTheme } from "next-themes";
 import { Sun, Moon, Monitor, LogOut, Shield, Bell } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { cn } from "@/lib/utils";
+import { useThemePreference } from "@/hooks/useThemePreference";
 import {
   requestNotificationPermission,
   notificationsEnabled,
   setNotificationsEnabled,
 } from "@/components/NotificationManager";
 
+const themeOptions = [
+  { value: "light" as const, label: "Light", icon: Sun },
+  { value: "dark" as const, label: "Dark", icon: Moon },
+  { value: "system" as const, label: "System", icon: Monitor },
+];
+
 export function SettingsPage() {
   const { data: session, update } = useSession();
-  const { theme, setTheme } = useTheme();
+  const { mounted: themeMounted, theme, setPreference } = useThemePreference();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -28,11 +34,9 @@ export function SettingsPage() {
   const [hasVaultPassword, setHasVaultPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [mounted, setMounted] = useState(false);
   const [notificationsOn, setNotificationsOn] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     setNotificationsOn(notificationsEnabled());
   }, []);
 
@@ -65,16 +69,6 @@ export function SettingsPage() {
       const data = await res.json();
       setError(data.error);
     }
-  };
-
-  const changeTheme = async (newTheme: string) => {
-    setTheme(newTheme);
-    await fetch("/api/settings", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "theme", theme: newTheme }),
-    });
-    await update({ theme: newTheme });
   };
 
   const changePassword = async () => {
@@ -126,12 +120,6 @@ export function SettingsPage() {
     await signOut({ callbackUrl: "/login" });
   };
 
-  const themes = [
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark", label: "Dark", icon: Moon },
-    { value: "system", label: "System", icon: Monitor },
-  ];
-
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
@@ -154,13 +142,14 @@ export function SettingsPage() {
         <Card>
           <h2 className="mb-4 font-medium">Theme</h2>
           <div className="grid grid-cols-3 gap-2">
-            {themes.map((t) => (
+            {themeOptions.map((t) => (
               <button
                 key={t.value}
-                onClick={() => changeTheme(t.value)}
+                type="button"
+                onClick={() => setPreference(t.value)}
                 className={cn(
-                  "flex flex-col items-center gap-2 rounded-xl border p-4 transition-all",
-                  mounted && theme === t.value
+                  "flex flex-col items-center gap-2 rounded-xl border p-4 transition-colors",
+                  themeMounted && theme === t.value
                     ? "border-neutral-900 bg-neutral-50 dark:border-white dark:bg-neutral-800"
                     : "border-neutral-200 hover:border-neutral-300 dark:border-neutral-700"
                 )}
