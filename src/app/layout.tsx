@@ -26,6 +26,10 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Control Center",
   },
+  applicationName: "Control Center",
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: "/icons/icon-192.png",
     apple: "/icons/icon-192.png",

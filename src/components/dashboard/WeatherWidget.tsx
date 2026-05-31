@@ -1,14 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Cloud, Droplets, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { WeatherData } from "@/types";
+
+const REFRESH_MS = 15 * 60 * 1000;
 
 export function WeatherWidget() {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const fetchWeather = useCallback((coords: GeolocationCoordinates) => {
+    fetch(`/api/weather?lat=${coords.latitude}&lon=${coords.longitude}`)
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then(setWeather)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -17,31 +27,27 @@ export function WeatherWidget() {
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const res = await fetch(
-            `/api/weather?lat=${position.coords.latitude}&lon=${position.coords.longitude}`
-          );
-          if (res.ok) {
-            const data = await res.json();
-            setWeather(data);
-          } else {
-            setError(true);
-          }
-        } catch {
+    let intervalId: ReturnType<typeof setInterval>;
+
+    const load = () => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setError(false);
+          fetchWeather(position.coords);
+          clearInterval(intervalId);
+          intervalId = setInterval(() => fetchWeather(position.coords), REFRESH_MS);
+        },
+        () => {
           setError(true);
-        } finally {
           setLoading(false);
-        }
-      },
-      () => {
-        setError(true);
-        setLoading(false);
-      },
-      { timeout: 10000 }
-    );
-  }, []);
+        },
+        { timeout: 10000, maximumAge: 60000 }
+      );
+    };
+
+    load();
+    return () => clearInterval(intervalId);
+  }, [fetchWeather]);
 
   if (loading) {
     return (
@@ -64,9 +70,9 @@ export function WeatherWidget() {
   }
 
   return (
-    <Card className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-sky-500/10">
+    <Card className="flex items-center justify-between gap-4">
+      <div className="flex min-w-0 items-center gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-500/10">
           <Cloud className="h-6 w-6 text-sky-600 dark:text-sky-400" />
         </div>
         <div>
@@ -74,10 +80,10 @@ export function WeatherWidget() {
           <p className="text-sm text-neutral-500">{weather.condition}</p>
         </div>
       </div>
-      <div className="text-right text-sm text-neutral-500">
+      <div className="shrink-0 text-right text-sm text-neutral-500">
         <div className="flex items-center justify-end gap-1">
           <MapPin className="h-3.5 w-3.5" />
-          {weather.location}
+          <span className="max-w-[120px] truncate">{weather.location}</span>
         </div>
         <div className="mt-1 flex items-center justify-end gap-1">
           <Droplets className="h-3.5 w-3.5" />

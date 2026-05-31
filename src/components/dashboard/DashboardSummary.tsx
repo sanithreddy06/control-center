@@ -5,12 +5,22 @@ import Link from "next/link";
 import { GraduationCap, CheckSquare, StickyNote, HardDrive } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import { formatExamCountdown } from "@/lib/dates";
+import { formatExamWidgetCountdown } from "@/lib/dates";
 import { formatFileSize } from "@/lib/utils";
 
 interface SummaryData {
-  exams: Array<{ id: string; name: string; subject: string; daysLeft: number }>;
-  todos: { pending: number; completed: number; todayCount: number; todayTasks: Array<{ id: string; title: string }> };
+  exams: Array<{
+    id: string;
+    name: string;
+    subject: string;
+    daysLeft: number;
+  }>;
+  todos: {
+    pending: number;
+    completed: number;
+    todayCount: number;
+    todayTasks: Array<{ id: string; title: string }>;
+  };
   notes: { total: number; recent: Array<{ id: string; title: string }> };
   storage: { usedBytes: number; totalBytes: number; usedPercent: number };
 }
@@ -21,7 +31,7 @@ export function DashboardSummary() {
 
   useEffect(() => {
     fetch("/api/dashboard/summary")
-      .then((res) => res.json())
+      .then((res) => (res.ok ? res.json() : null))
       .then(setData)
       .finally(() => setLoading(false));
   }, []);
@@ -44,13 +54,19 @@ export function DashboardSummary() {
           <ul className="space-y-2">
             {data.exams.map((exam) => (
               <li key={exam.id} className="text-sm">
-                <span className="font-medium">{exam.name}</span>
-                <span className="text-neutral-500"> — {formatExamCountdown(exam.daysLeft)}</span>
+                <span className="font-medium">{exam.subject || exam.name}</span>
+                <span className="text-neutral-500">
+                  {" "}
+                  — {formatExamWidgetCountdown(exam.daysLeft)}
+                </span>
               </li>
             ))}
           </ul>
         )}
-        <Link href="/exams" className="mt-3 inline-block text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white">
+        <Link
+          href="/exams"
+          className="mt-3 inline-block text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+        >
           View all →
         </Link>
       </Card>
@@ -63,18 +79,32 @@ export function DashboardSummary() {
           <h3 className="font-medium">Todo Summary</h3>
         </div>
         <div className="space-y-1 text-sm">
-          <p><span className="text-neutral-500">Pending:</span> <span className="font-medium">{data.todos.pending}</span></p>
-          <p><span className="text-neutral-500">Completed:</span> <span className="font-medium">{data.todos.completed}</span></p>
-          <p><span className="text-neutral-500">Today&apos;s Tasks:</span> <span className="font-medium">{data.todos.todayCount}</span></p>
+          <p>
+            <span className="text-neutral-500">Pending:</span>{" "}
+            <span className="font-medium">{data.todos.pending}</span>
+          </p>
+          <p>
+            <span className="text-neutral-500">Completed:</span>{" "}
+            <span className="font-medium">{data.todos.completed}</span>
+          </p>
+          <p>
+            <span className="text-neutral-500">Today&apos;s Tasks:</span>{" "}
+            <span className="font-medium">{data.todos.todayCount}</span>
+          </p>
         </div>
         {data.todos.todayTasks.length > 0 && (
           <ul className="mt-2 space-y-1 border-t border-neutral-100 pt-2 dark:border-neutral-800">
             {data.todos.todayTasks.map((t) => (
-              <li key={t.id} className="truncate text-xs text-neutral-500">{t.title}</li>
+              <li key={t.id} className="truncate text-xs text-neutral-500">
+                {t.title}
+              </li>
             ))}
           </ul>
         )}
-        <Link href="/todos" className="mt-3 inline-block text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white">
+        <Link
+          href="/todos"
+          className="mt-3 inline-block text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+        >
           View all →
         </Link>
       </Card>
@@ -87,20 +117,27 @@ export function DashboardSummary() {
           <h3 className="font-medium">Notes</h3>
         </div>
         <p className="mb-2 text-sm">
-          <span className="text-neutral-500">Total:</span> <span className="font-medium">{data.notes.total}</span>
+          <span className="text-neutral-500">Total:</span>{" "}
+          <span className="font-medium">{data.notes.total}</span>
         </p>
         {data.notes.recent.length === 0 ? (
           <p className="text-sm text-neutral-500">No notes yet</p>
         ) : (
           <ul className="space-y-1">
             {data.notes.recent.map((note) => (
-              <li key={note.id} className="truncate text-sm text-neutral-600 dark:text-neutral-400">
+              <li
+                key={note.id}
+                className="truncate text-sm text-neutral-600 dark:text-neutral-400"
+              >
                 {note.title}
               </li>
             ))}
           </ul>
         )}
-        <Link href="/notes" className="mt-3 inline-block text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white">
+        <Link
+          href="/notes"
+          className="mt-3 inline-block text-xs text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
+        >
           View all →
         </Link>
       </Card>
@@ -114,7 +151,9 @@ export function DashboardSummary() {
         </div>
         <p className="text-lg font-light">
           {formatFileSize(data.storage.usedBytes)}{" "}
-          <span className="text-sm text-neutral-500">/ {formatFileSize(data.storage.totalBytes)}</span>
+          <span className="text-sm text-neutral-500">
+            / {formatFileSize(data.storage.totalBytes)}
+          </span>
         </p>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-neutral-100 dark:bg-neutral-800">
           <div

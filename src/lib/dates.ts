@@ -23,6 +23,13 @@ export function formatExamCountdown(daysLeft: number): string {
   return `${daysLeft} days left`;
 }
 
+/** Dashboard widget label — "Today" without exclamation. */
+export function formatExamWidgetCountdown(daysLeft: number): string {
+  if (daysLeft === 0) return "Today";
+  if (daysLeft === 1) return "Tomorrow";
+  return `${daysLeft} days left`;
+}
+
 export function formatLocalDate(dateStr: string, pattern: string): string {
   return format(parseLocalDate(dateStr), pattern);
 }

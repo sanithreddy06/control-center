@@ -5,7 +5,7 @@ Personal digital hub for **Sai Sanith Reddy** — a premium, minimalistic web ap
 ## Features
 
 - **Authentication** — Login-only access with bcrypt password hashing (admin-created accounts)
-- **Dashboard** — Greeting, live clock, weather widget, quick access modules
+- **Dashboard** — Greeting, clock, weather, summary cards, quick access modules
 - **Notes** — Google Keep-style notes with rich text, categories, pin & search
 - **Todos** — Tasks with due dates, priorities, and completion tracking
 - **Documents Vault** — Secure file storage with separate vault password

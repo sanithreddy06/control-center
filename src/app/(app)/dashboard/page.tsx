@@ -4,6 +4,7 @@ import { ClockWidget } from "@/components/dashboard/ClockWidget";
 import { WeatherWidget } from "@/components/dashboard/WeatherWidget";
 import { DashboardSummary } from "@/components/dashboard/DashboardSummary";
 import { ModuleCards } from "@/components/dashboard/ModuleCards";
+import { PWAInstallPrompt } from "@/components/dashboard/PWAInstallPrompt";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -12,18 +13,16 @@ export default async function DashboardPage() {
   return (
     <div>
       <DynamicGreeting name={name} />
-
-      <div className="mb-8 grid gap-4 lg:grid-cols-2">
+      <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ClockWidget />
         <WeatherWidget />
       </div>
-
       <DashboardSummary />
-
       <div>
         <h2 className="mb-4 text-lg font-medium">Quick Access</h2>
         <ModuleCards />
       </div>
+      <PWAInstallPrompt />
     </div>
   );
 }

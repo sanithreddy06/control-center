@@ -1,5 +1,6 @@
 -- Control Center Database Schema
--- Run this in Supabase SQL Editor
+-- Run ONCE in Supabase SQL Editor on a new project.
+-- If you already ran this before, skip it and run 002_dashboard_layout.sql only.
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -29,9 +30,9 @@ CREATE TABLE IF NOT EXISTS notes (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_notes_user_id ON notes(user_id);
-CREATE INDEX idx_notes_category ON notes(category);
-CREATE INDEX idx_notes_pinned ON notes(is_pinned);
+CREATE INDEX IF NOT EXISTS idx_notes_user_id ON notes(user_id);
+CREATE INDEX IF NOT EXISTS idx_notes_category ON notes(category);
+CREATE INDEX IF NOT EXISTS idx_notes_pinned ON notes(is_pinned);
 
 -- Todos
 CREATE TABLE IF NOT EXISTS todos (
@@ -46,9 +47,9 @@ CREATE TABLE IF NOT EXISTS todos (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_todos_user_id ON todos(user_id);
-CREATE INDEX idx_todos_due_date ON todos(due_date);
-CREATE INDEX idx_todos_completed ON todos(is_completed);
+CREATE INDEX IF NOT EXISTS idx_todos_user_id ON todos(user_id);
+CREATE INDEX IF NOT EXISTS idx_todos_due_date ON todos(due_date);
+CREATE INDEX IF NOT EXISTS idx_todos_completed ON todos(is_completed);
 
 -- Documents
 CREATE TABLE IF NOT EXISTS documents (
@@ -63,8 +64,8 @@ CREATE TABLE IF NOT EXISTS documents (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_documents_user_id ON documents(user_id);
-CREATE INDEX idx_documents_category ON documents(category);
+CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents(user_id);
+CREATE INDEX IF NOT EXISTS idx_documents_category ON documents(category);
 
 -- Exams
 CREATE TABLE IF NOT EXISTS exams (
@@ -79,9 +80,9 @@ CREATE TABLE IF NOT EXISTS exams (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_exams_user_id ON exams(user_id);
-CREATE INDEX idx_exams_date ON exams(exam_date);
-CREATE INDEX idx_exams_archived ON exams(is_archived);
+CREATE INDEX IF NOT EXISTS idx_exams_user_id ON exams(user_id);
+CREATE INDEX IF NOT EXISTS idx_exams_date ON exams(exam_date);
+CREATE INDEX IF NOT EXISTS idx_exams_archived ON exams(is_archived);
 
 -- Bookmarks
 CREATE TABLE IF NOT EXISTS bookmarks (
@@ -96,9 +97,9 @@ CREATE TABLE IF NOT EXISTS bookmarks (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_bookmarks_user_id ON bookmarks(user_id);
-CREATE INDEX idx_bookmarks_category ON bookmarks(category);
-CREATE INDEX idx_bookmarks_favorite ON bookmarks(is_favorite);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_user_id ON bookmarks(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_category ON bookmarks(category);
+CREATE INDEX IF NOT EXISTS idx_bookmarks_favorite ON bookmarks(is_favorite);
 
 -- Calendar events (birthdays, reminders, custom events)
 CREATE TABLE IF NOT EXISTS calendar_events (
@@ -112,8 +113,8 @@ CREATE TABLE IF NOT EXISTS calendar_events (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_calendar_events_user_id ON calendar_events(user_id);
-CREATE INDEX idx_calendar_events_date ON calendar_events(event_date);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_user_id ON calendar_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_calendar_events_date ON calendar_events(event_date);
 
 -- Analytics tracking
 CREATE TABLE IF NOT EXISTS analytics_events (
@@ -125,10 +126,10 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_analytics_domain ON analytics_events(domain);
-CREATE INDEX idx_analytics_path ON analytics_events(path);
-CREATE INDEX idx_analytics_created_at ON analytics_events(created_at);
-CREATE INDEX idx_analytics_visitor_id ON analytics_events(visitor_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_domain ON analytics_events(domain);
+CREATE INDEX IF NOT EXISTS idx_analytics_path ON analytics_events(path);
+CREATE INDEX IF NOT EXISTS idx_analytics_created_at ON analytics_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_visitor_id ON analytics_events(visitor_id);
 
 -- Updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
