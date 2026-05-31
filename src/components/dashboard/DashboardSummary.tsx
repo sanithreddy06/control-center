@@ -5,6 +5,7 @@ import Link from "next/link";
 import { GraduationCap, CheckSquare, StickyNote, HardDrive } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { formatExamCountdown } from "@/lib/dates";
 import { formatFileSize } from "@/lib/utils";
 
 interface SummaryData {
@@ -44,7 +45,7 @@ export function DashboardSummary() {
             {data.exams.map((exam) => (
               <li key={exam.id} className="text-sm">
                 <span className="font-medium">{exam.name}</span>
-                <span className="text-neutral-500"> — {exam.daysLeft === 0 ? "Today" : `${exam.daysLeft} days left`}</span>
+                <span className="text-neutral-500"> — {formatExamCountdown(exam.daysLeft)}</span>
               </li>
             ))}
           </ul>

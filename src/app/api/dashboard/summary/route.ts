@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAuth, serverErrorResponse, unauthorizedResponse } from "@/lib/auth/helpers";
 import { createAdminClient } from "@/lib/supabase/client";
-import { differenceInDays, format } from "date-fns";
+import { format } from "date-fns";
+import { calendarDaysUntil } from "@/lib/dates";
 
 const STORAGE_LIMIT_BYTES =
   parseInt(process.env.STORAGE_LIMIT_BYTES || "", 10) || 5 * 1024 * 1024 * 1024;
@@ -43,7 +44,7 @@ export async function GET() {
       name: e.name,
       subject: e.subject,
       exam_date: e.exam_date,
-      daysLeft: differenceInDays(new Date(e.exam_date), new Date()),
+      daysLeft: calendarDaysUntil(e.exam_date),
     }));
 
     const todos = todosRes.data || [];

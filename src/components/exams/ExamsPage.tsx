@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { LoadingSpinner, EmptyState } from "@/components/ui/LoadingSpinner";
-import { format, differenceInDays } from "date-fns";
+import { calendarDaysUntil, formatExamCountdown, formatLocalDate } from "@/lib/dates";
 
 export function ExamsPage() {
   const [exams, setExams] = useState<Exam[]>([]);
@@ -96,15 +96,15 @@ export function ExamsPage() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {exams.map((exam) => {
-            const daysLeft = differenceInDays(new Date(exam.exam_date), new Date());
+            const daysLeft = calendarDaysUntil(exam.exam_date);
             return (
               <Card key={exam.id} hover onClick={() => openEdit(exam)}>
                 <h3 className="font-medium">{exam.name}</h3>
                 <p className="text-sm text-neutral-500">{exam.subject}</p>
-                <p className="mt-2 text-sm">{format(new Date(exam.exam_date), "EEEE, MMM d, yyyy")}</p>
+                <p className="mt-2 text-sm">{formatLocalDate(exam.exam_date, "EEEE, MMM d, yyyy")}</p>
                 {!showArchived && daysLeft >= 0 && (
                   <p className="mt-1 text-xs font-medium text-violet-600 dark:text-violet-400">
-                    {daysLeft === 0 ? "Today!" : `${daysLeft} days left`}
+                    {formatExamCountdown(daysLeft)}
                   </p>
                 )}
                 {exam.notes && <p className="mt-2 text-xs text-neutral-400 line-clamp-2">{exam.notes}</p>}

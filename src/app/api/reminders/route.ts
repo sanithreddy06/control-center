@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAuth, serverErrorResponse, unauthorizedResponse } from "@/lib/auth/helpers";
 import { createAdminClient } from "@/lib/supabase/client";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
+import { calendarDaysUntil } from "@/lib/dates";
 
 export async function GET() {
   let user;
@@ -34,7 +35,7 @@ export async function GET() {
     const todosDueToday = todosRes.data || [];
     const exams = (examsRes.data || [])
       .filter((e) => {
-        const days = differenceInDays(new Date(e.exam_date), new Date());
+        const days = calendarDaysUntil(e.exam_date);
         return days === 0 || days === 1 || days === 3 || days === 7;
       })
       .map((e) => ({
@@ -42,7 +43,7 @@ export async function GET() {
         name: e.name,
         subject: e.subject,
         exam_date: e.exam_date,
-        daysLeft: differenceInDays(new Date(e.exam_date), new Date()),
+        daysLeft: calendarDaysUntil(e.exam_date),
       }));
 
     return NextResponse.json({ todosDueToday, exams });
